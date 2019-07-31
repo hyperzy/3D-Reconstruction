@@ -180,7 +180,7 @@ def init_level_set_function():
     grid = init_grid()
     interface_index, neg_index = init_shape(grid)
 
-    phi = fast_marching(interface_index, grid.shape)
+    phi = fast_marching(interface_index, grid.shape[1:])
     return interface_index
 
 
