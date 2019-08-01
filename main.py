@@ -3,6 +3,7 @@ import display
 import init
 import numpy as np
 import cv2
+import fmm
 
 
 
@@ -53,5 +54,15 @@ if __name__ == "__main__":
     print(limits)
     grid = init.init_grid()
     interface = init.init_level_set_function()
-    display.show_3D(all_params, testparam=point_set,testinterface=interface, testparam1=grid)
+    # display.show_3D(all_params, testparam=point_set,testinterface=interface, testparam1=grid)
 
+    radius = 5
+    arr = np.arange(-radius, radius + 1, 1) ** 2
+    mask2d = arr[:, None] + arr[None, :]
+    test2d = np.ones((20, 20), dtype=np.int16)
+    nx, ny = test2d.shape
+    test2d[int(nx/2) - radius: int(nx/2) + radius + 1, int(ny/2) - radius: int(ny/2) + radius + 1] = mask2d
+    zero_ls_index = np.where((test2d < (radius + 0.5) ** 2) & (test2d >= (radius - 0.5)** 2))
+    object_fmm = fmm.Fmm((nx, ny), zero_ls_index)
+    output = object_fmm.get_grid()
+    pass

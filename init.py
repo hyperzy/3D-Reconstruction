@@ -217,7 +217,7 @@ def init_shape(grid):
 
 # implementation of fast marching method
 def fast_marching(source_set_index, shape):
-    c, nx, ny, nz = shape
+    nx, ny, nz = shape
     phi = np.ones((nx, ny, nz), dtype=np.int16)
     # here set 2^15 as infinity
     np.left_shift(phi, 15, out=phi)
