@@ -3,7 +3,6 @@ import display
 import init
 import numpy as np
 import cv2
-import fmm
 
 
 
@@ -53,16 +52,18 @@ if __name__ == "__main__":
     limits, point_set = init.determin_bound_coord([all_params[0], all_params[4], all_params[2], all_params[6]], [seg_imgs[0], seg_imgs[4], seg_imgs[2], seg_imgs[6]])
     print(limits)
     grid = init.init_grid()
-    interface = init.init_level_set_function()
+    interface, phi = init.init_level_set_function()
     # display.show_3D(all_params, testparam=point_set,testinterface=interface, testparam1=grid)
-
-    radius = 5
-    arr = np.arange(-radius, radius + 1, 1) ** 2
-    mask2d = arr[:, None] + arr[None, :]
-    test2d = np.ones((20, 20), dtype=np.int16)
-    nx, ny = test2d.shape
-    test2d[int(nx/2) - radius: int(nx/2) + radius + 1, int(ny/2) - radius: int(ny/2) + radius + 1] = mask2d
-    zero_ls_index = np.where((test2d < (radius + 0.5) ** 2) & (test2d >= (radius - 0.5)** 2))
-    object_fmm = fmm.Fmm((nx, ny), zero_ls_index)
-    output = object_fmm.get_grid()
+    filesio.save_array("initial_grid.txt", phi)
     pass
+
+    # radius = 5
+    # arr = np.arange(-radius, radius + 1, 1) ** 2
+    # mask2d = arr[:, None] + arr[None, :]
+    # test2d = np.ones((100, 100), dtype=np.int16)
+    # nx, ny = test2d.shape
+    # test2d[int(nx/2) - radius: int(nx/2) + radius + 1, int(ny/2) - radius: int(ny/2) + radius + 1] = mask2d
+    # zero_ls_index = np.where((test2d < (radius + 0.5) ** 2) & (test2d >= (radius - 0.5)** 2))
+    # object_fmm = fmm2d.Fmm((nx, ny), zero_ls_index)
+    # output = object_fmm.get_grid()
+    # pass

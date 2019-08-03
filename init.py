@@ -1,3 +1,4 @@
+import fmm
 import numpy as np
 import cv2
 import time
@@ -179,9 +180,12 @@ def init_grid():
 def init_level_set_function():
     grid = init_grid()
     interface_index, neg_index = init_shape(grid)
-
-    phi = fast_marching(interface_index, grid.shape[1:])
-    return interface_index
+    obejct_fmm = fmm.Fmm(grid.shape[1:], interface_index)
+    unsigned_phi = obejct_fmm.get_grid()
+    sign_mask = np.ones(grid.shape[1:], dtype=np.int16)
+    sign_mask[neg_index] = -1
+    signed_phi = unsigned_phi * sign_mask
+    return interface_index, signed_phi
 
 
 # initialize the shape, here I used sphere as initial shape
@@ -197,8 +201,7 @@ def init_shape(grid):
     center_z = int(nz / 2)
 
     # start = time.clock()
-    temp_phi = np.ones((nx, ny, nz), dtype=np.int16)
-    np.left_shift(temp_phi, 15, out=temp_phi)
+    temp_phi = (1 << 15) * np.ones((nx, ny, nz), dtype=np.int16)
     # end = time.clock()
     # print("time consumption: ", end - start)
 
@@ -206,21 +209,11 @@ def init_shape(grid):
     length_arr = np.arange(-radius, radius + 1, 1) ** 2
     mask = length_arr[:, None, None] + length_arr[None, :, None] + length_arr[None, None, :]
 
-    temp_phi[center_x - radius:center_x + radius + 1,\
-            center_y - radius:center_y + radius + 1,\
+    temp_phi[center_x - radius:center_x + radius + 1,
+            center_y - radius:center_y + radius + 1,
             center_z - radius:center_z + radius + 1] = mask
 
     interface_index = np.where((temp_phi < (radius + 0.5) ** 2) & (temp_phi >= (radius - 0.5) ** 2))
-    neg_index = np.where(temp_phi < (radius - 0.5) ** 2)
+    neg_index = np.where((temp_phi < (radius - 0.5) ** 2))
     return interface_index, neg_index
-
-
-# implementation of fast marching method
-def fast_marching(source_set_index, shape):
-    nx, ny, nz = shape
-    phi = np.ones((nx, ny, nz), dtype=np.int16)
-    # here set 2^15 as infinity
-    np.left_shift(phi, 15, out=phi)
-
-
 

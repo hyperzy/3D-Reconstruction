@@ -66,5 +66,27 @@ def get_cam_param(filename):
     return all_cam_param
 
 
+# save numpy array
+def save_array(path, arr):
+    with open(path, "w") as out:
+        out.write("# Shape {0}\n".format(arr.shape))
+        if arr.ndim <= 2:
+            np.savetxt(path, arr, fmt="%d")
+        else:
+            for i in arr:
+                out.write("# new slice\n")
+                np.savetxt(out, i, fmt="%d")
+
+
+
+# read numpy array
+def read_array(path, shape, dtype=None):
+    temp = np.loadtxt(path, dtype=dtype)
+    if len(shape) <= 2:
+        return temp
+    else:
+        return temp.reshape(shape)
+
+
 if __name__ == "__main__":
     get_cam_param("viff.xml")

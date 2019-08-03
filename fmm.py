@@ -65,6 +65,7 @@ class Fmm(object):
             if len(tentative_index[0]) == 0:
                 continue
             minval = self.grid[tentative_index].min()
+            print("Processing value: ", minval)
             min_val_index = np.where(self.grid == minval)
             # look for tentative grid and update status
             for i, j, k in zip(min_val_index[0], min_val_index[1], min_val_index[2]):
@@ -81,7 +82,7 @@ class Fmm(object):
                     val_i_min = self.inf
                     val_j_min = self.inf
                     val_k_min = self.inf
-                    for i_computable, j_computable, k_computable in zip(computable_neighbor[0], computable_neighbor[1]):
+                    for i_computable, j_computable, k_computable in zip(computable_neighbor[0], computable_neighbor[1],computable_neighbor[2]):
                         if (j_computable == j_tentative) & (i_computable == i_tentative):
                             val_k_min = min(val_k_min, self.grid[i_computable, j_computable, k_computable])
                         elif (i_computable == i_tentative) & (k_computable == k_tentative):
@@ -95,7 +96,7 @@ class Fmm(object):
                     a1, a2, a3 = val_list
 
                     if (a1 - a2)**2 + (a1 - a3)**2 < 1 / (speed**2):
-                        t = round((a1 + a2 + a3 + math.sqrt(3 / (speed**2) - (a1 - a2)**2 - (a1 - a3)**2, (a2 - a3)**2)) / 3 + 0,5)
+                        t = round((a1 + a2 + a3 + math.sqrt(3 / (speed**2) - (a1 - a2)**2 - (a1 - a3)**2 - (a2 - a3)**2)) / 3 + 0.5)
                     elif ((a1 - a2)**2 + (a1 - a3)**2 >= 1 / (speed**2)) & (abs(a2 - a3) < 1 / speed):
                         t = round((a2 + a3 + math.sqrt(2 / (speed ** 2) - (a2 - a3)**2)) / 2 + 0.5)
                     else:
