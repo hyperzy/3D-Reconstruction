@@ -67,15 +67,15 @@ def get_cam_param(filename):
 
 
 # save numpy array
-def save_array(path, arr):
+def save_array(path, arr, format="%d"):
     with open(path, "w") as out:
         out.write("# Shape {0}\n".format(arr.shape))
         if arr.ndim <= 2:
-            np.savetxt(path, arr, fmt="%d")
+            np.savetxt(path, arr, fmt=format)
         else:
             for i in arr:
                 out.write("# new slice\n")
-                np.savetxt(out, i, fmt="%d")
+                np.savetxt(out, i, fmt=format)
 
 
 

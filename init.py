@@ -74,7 +74,7 @@ def compute_intersection(cam_params_arr, point3d_set_arr):
 
 # use front, back, left, right side seg_image to determine
 # the coordinates of bounding cube.
-# This function is still not perfect since you need to determin the 
+# This function is still not perfect since you need to determine the
 # orientation of world coordinate system
 def determin_bound_coord(cam_params_arr, seg_img_arr):
     scale_factor = 1.5
@@ -145,6 +145,7 @@ def determin_bound_coord(cam_params_arr, seg_img_arr):
 
 
 # initialize the Cartesian grid for computing
+# this is a cube-like bounding box instead of shpere or elliptic ball
 def init_grid():
     global limits
     # number of point along each axis
@@ -217,3 +218,12 @@ def init_shape(grid):
     neg_index = np.where((temp_phi < (radius - 0.5) ** 2))
     return interface_index, neg_index
 
+
+# get the zero level set index
+def get_zero_set_index(grid_SDF):
+    return np.where(grid_SDF == 0)
+
+
+# get negative level set index
+def get_neg_set_index(grid_SDF):
+    return np.where(grid_SDF < 0)

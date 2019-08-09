@@ -18,7 +18,7 @@ def show_img(data):
         cv2.destroyAllWindows()
 
 
-def show_3D(all_cam_params, pointcloud=None, testparam=None, testinterface=None, testparam1=None):
+def show_3D(all_cam_params, pointcloud=None, testparam=None, testinterface=None, testparam1=None, nonvisible=None):
     if pointcloud == None:
         colors = vtk.vtkNamedColors()
         # bkg = map(lambda x: x / 255.0, [])
@@ -64,6 +64,25 @@ def show_3D(all_cam_params, pointcloud=None, testparam=None, testinterface=None,
 
         joint.AddPart(actor)
 
+        # display non-visible points
+        if nonvisible != None:
+            points = vtk.vtkPoints()
+            vertices = vtk.vtkCellArray()
+            for i, j, k in zip(nonvisible[0], nonvisible[1], nonvisible[2]):
+                id = points.InsertNextPoint(testparam1[:, i, j, k])
+                vertices.InsertNextCell(1)
+                vertices.InsertCellPoint(id)
+
+            polydata = vtk.vtkPolyData()
+            polydata.SetPoints(points)
+            polydata.SetVerts(vertices)
+            mapper = vtk.vtkPolyDataMapper()
+            mapper.SetInputData(polydata)
+            actor = vtk.vtkActor()
+            actor.SetMapper(mapper)
+            actor.GetProperty().SetColor(colors.GetColor3d("Red"))
+
+            joint.AddPart(actor)
         # line = vtk.vtkLineSource()
         # line1 = vtk.vtkLineSource()
         # p0 = all_cam_params[17].getMotion()

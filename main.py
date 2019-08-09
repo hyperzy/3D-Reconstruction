@@ -1,22 +1,35 @@
 import filesio
 import display
 import init
+import visibility
 import numpy as np
 import cv2
+import multiprocessing
 
 
 
 '''
-Note: vector is represented as 1d array and used for 2d array when necessarily
+Note: 1. vector is represented as 1d array and used for 2d array when necessarily
+      2. The dataset I use is a little bit special since the cameras surround the obejet
+         and the origin of world coordinate system is ALMOST at the intersection of all
+         the cameras optical shafts.
+         If the dataset is not the case, try to do coordinate transformation first.
+      3. I did not consider the case where there exist camera above or below the object(along z
+         axis)
+      4. I have not consider camera's projection on the surface is exactly at the border edge.
+         It is also simple to implement, just take care when doing bilinear interpolation.
 '''
 
 all_params = []
 origin_imgs = []
 seg_imgs = []
+resolution = init.resolution
+psi_list = []
 
-# use four pics at 0, 90, 180, 270 degrees to determine the boundary
-def determine_grid_lim(pics, cam_params):
-    pass
+
+# callback function
+def callback(args):
+    psi_list[args[0]] = args[1]
 
 
 if __name__ == "__main__":
@@ -50,11 +63,27 @@ if __name__ == "__main__":
     # xw = coord_transform_matrix @ xc
 
     limits, point_set = init.determin_bound_coord([all_params[0], all_params[4], all_params[2], all_params[6]], [seg_imgs[0], seg_imgs[4], seg_imgs[2], seg_imgs[6]])
+    for i in range(len(all_params)):
+        # global psi_list
+        psi_list.append(np.array([]))
     print(limits)
     grid = init.init_grid()
-    interface, phi = init.init_level_set_function()
-    # display.show_3D(all_params, testparam=point_set,testinterface=interface, testparam1=grid)
-    filesio.save_array("initial_grid.txt", phi)
+    # interface, phi = init.init_level_set_function()
+    # filesio.save_array("initial_grid_small.txt", phi, format="%d)
+    phi = np.loadtxt("initial_grid.txt", dtype=np.int16).reshape(grid.shape[1:])
+    interface = init.get_zero_set_index(phi)
+    display.show_3D(all_params, testparam=point_set, testinterface=interface, testparam1=grid)
+    p = multiprocessing.Pool()
+    for i in range(len(all_params)):
+        p.apply_async(func=visibility.multiprocess_handler, args=(i, all_params[i], grid, phi, limits, resolution), callback=callback)
+    p.close()
+    p.join()
+    # object_visibility = visibility.Visibility(all_params[7], grid, phi, limits, resolution)
+    # direction = object_visibility.determine_direction()
+    # object_visibility.calculate_all()
+    nonvis = np.where(psi_list[0] < 0)
+    display.show_3D(all_params, testparam=point_set, testinterface=interface, testparam1=grid, nonvisible=nonvis)
+    # filesio.save_array("initial_grid.txt", phi)
     pass
 
     # radius = 5
