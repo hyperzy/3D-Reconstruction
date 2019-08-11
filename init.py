@@ -3,7 +3,7 @@ import numpy as np
 import cv2
 import time
 
-resolution = 0.2
+resolution = 0.4
 limits = []
 bound_coord = []
 dt = np.float32

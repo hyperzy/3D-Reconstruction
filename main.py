@@ -1,7 +1,7 @@
 import filesio
 import display
 import init
-import visibility
+import evolution
 import numpy as np
 import cv2
 import multiprocessing
@@ -24,12 +24,6 @@ all_params = []
 origin_imgs = []
 seg_imgs = []
 resolution = init.resolution
-psi_list = []
-
-
-# callback function
-def callback(args):
-    psi_list[args[0]] = args[1]
 
 
 if __name__ == "__main__":
@@ -37,6 +31,7 @@ if __name__ == "__main__":
     seg_imgs = filesio.ImageData("seg_images", 0).get_data()
     for it in seg_imgs:
         it = cv2.threshold(it, 128, 255, cv2.THRESH_BINARY)
+    gray_imgs = filesio.ImageData("images", 0).get_data()
     '''
     since we test with 8 images, here we only retrieve 8 cameras
     '''
@@ -63,26 +58,21 @@ if __name__ == "__main__":
     # xw = coord_transform_matrix @ xc
 
     limits, point_set = init.determin_bound_coord([all_params[0], all_params[4], all_params[2], all_params[6]], [seg_imgs[0], seg_imgs[4], seg_imgs[2], seg_imgs[6]])
-    for i in range(len(all_params)):
-        # global psi_list
-        psi_list.append(np.array([]))
+
     print(limits)
     grid = init.init_grid()
     # interface, phi = init.init_level_set_function()
     # filesio.save_array("initial_grid_small.txt", phi, format="%d)
-    phi = np.loadtxt("initial_grid.txt", dtype=np.int16).reshape(grid.shape[1:])
+    phi = np.loadtxt("initial_grid_small.txt", dtype=np.int16).reshape(grid.shape[1:])
     interface = init.get_zero_set_index(phi)
     display.show_3D(all_params, testparam=point_set, testinterface=interface, testparam1=grid)
-    p = multiprocessing.Pool()
-    for i in range(len(all_params)):
-        p.apply_async(func=visibility.multiprocess_handler, args=(i, all_params[i], grid, phi, limits, resolution), callback=callback)
-    p.close()
-    p.join()
+
+    object_evolution = evolution.Evolve(grid, phi, seg_imgs, gray_imgs, all_params, limits, resolution, bdbox_pointset=point_set)
+    object_evolution.evolve()
     # object_visibility = visibility.Visibility(all_params[7], grid, phi, limits, resolution)
     # direction = object_visibility.determine_direction()
     # object_visibility.calculate_all()
-    nonvis = np.where(psi_list[0] < 0)
-    display.show_3D(all_params, testparam=point_set, testinterface=interface, testparam1=grid, nonvisible=nonvis)
+    # nonvis = np.where(psi_list[0] < 0)
     # filesio.save_array("initial_grid.txt", phi)
     pass
 

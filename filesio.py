@@ -7,11 +7,12 @@ num_cams = 36
 
 
 class CameraParams:
-    def __init__(self, R, t, K):
+    def __init__(self, R, t, K, P):
         self.__R = R
         # t here is the camera origin point w.r.t world coordinate system
         self.__t = t
         self.__K = K
+        self.P = P
 
     def getRotation(self):
         return self.__R
@@ -53,7 +54,7 @@ def get_cam_param(filename):
         np.divide(t, t[3], out=t)
         # print(T.shape)
         t = t[0:-1]
-        cam_params = CameraParams(R, t, K)
+        cam_params = CameraParams(R, t, K, P)
         all_cam_param.append(cam_params)
     # print(array_T)
     fs.release()
